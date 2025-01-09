@@ -25,11 +25,18 @@ enum
 #define MEMORY_MAX (1 << 16)
 uint16_t memory[MEMORY_MAX];  // 65536 mem locations
 
-// REGISTERS
+// MEMORY MAPPED REGISTERS
+enum
+{
+    MR_KBSR = 0xFE00, // keyboard status
+    MR_KBDR = 0xFE02  // keyboard data
+};
+
+// GENERAL PURPOSE REGISTERS
 // 10 total, each 16 bits
 enum
 {
-    // general purpose
+    
     R_R0 = 0,
     R_R1,
     R_R2,
@@ -84,7 +91,7 @@ void disable_input_buffering()
 {
     tcgetattr(STDIN_FILENO, &original_tio);
     struct termios new_tio = original_tio;
-    new_tio.c_lflag &= ~ICANON & ~ECHO;
+    new_tio.c_lflag &= ~ICANON & ~ECHO; // Disable canonical mode and echoing
     tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
 }
 
@@ -137,6 +144,63 @@ void update_flags(uint16_t r)
         reg[R_COND] = FL_POS;
     }
 }
+
+uint16_t swap16(uint16_t x)
+{
+    return (x << 8) | (x >> 8);
+}
+
+void read_image_file(FILE* file)
+{
+    // the origin tells us where in memory to place the image
+    uint16_t origin;
+    fread(&origin, sizeof(origin), 1, file);
+    origin = swap16(origin);
+
+    // we know the maximum file size so we only need one fread
+    uint16_t max_read = MEMORY_MAX - origin;
+    uint16_t* p = memory + origin;
+    size_t read = fread(p, sizeof(uint16_t), max_read, file);
+
+    // swap to little endian
+    while (read-- > 0)
+    {
+        *p = swap16(*p);
+        ++p;
+    }
+}
+
+int read_image(const char* image_path)
+{
+    FILE* file = fopen(image_path, "rb");
+    if (!file) { return 0; };
+    read_image_file(file);
+    fclose(file);
+    return 1;
+}
+
+void mem_write(uint16_t address, uint16_t val)
+{
+    memory[address] = val;
+}
+
+
+uint16_t mem_read(uint16_t address)
+{
+    if (address == MR_KBSR)
+    {
+        if (check_key())
+        {
+            memory[MR_KBSR] = (1 << 15); // Set the "keyboard ready" bit
+            memory[MR_KBDR] = getchar(); // Read the character
+        }
+        else
+        {
+            memory[MR_KBSR] = 0; // Clear the "keyboard ready" bit
+        }
+    }
+    return memory[address];
+ }
 
 int main(int argc, const char* argv[])
 {
@@ -342,7 +406,7 @@ int main(int argc, const char* argv[])
                             }
                         case TRAP_IN: // input character
                             {
-                                printf("Enter a character: ");
+                                printf("*** Enter a character: ");
                                 char c = getchar();
                                 putc(c, stdout);
                                 fflush(stdout);
