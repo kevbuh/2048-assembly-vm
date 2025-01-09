@@ -16,3 +16,7 @@ HALT                               ; halt program
 HELLO_STR .STRINGZ "Hello World!"  ; store string here in the program
 .END                               ; mark end of the file
 ```
+
+### ISA Formats
+
+<img src="./opcodes.png"/>

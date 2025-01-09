@@ -63,9 +63,9 @@ enum
 // CONDITION FLAGS
 enum
 {
-    FL_POS = 1 << 0, /* P */
-    FL_ZRO = 1 << 1, /* Z */
-    FL_NEG = 1 << 2, /* N */
+    FL_POS = 1 << 0, // P (positive)
+    FL_ZRO = 1 << 1, // Z (zero)
+    FL_NEG = 1 << 2, // N (negative)
 };
 
 // INPUT BUFFERING
@@ -189,8 +189,25 @@ int main(int argc, const char* argv[])
                     break;
                 }
             case OP_AND:
-                @{AND}
-                break;
+                {
+                    // destination register (DR)
+                    uint16_t r0 = (instr >> 9) & 0x7;
+                    // first operand (SR1)
+                    uint16_t r1 = (instr >> 6) & 0x7;
+
+                    uint16_t imm_flag = (instr >> 5) & 0x1;
+                    if (imm_flag) {
+                        uint16_t imm5 = sign_extend(instr & 0x1F, 5);
+                        reg[r0] = reg[r1] & imm5;
+                    }
+                    else {
+                        uint16_t r2 = instr & 0x7;
+                        reg[r0] = reg[r1] & reg[r2];
+                    }
+
+                    update_flags(r0);
+                    break;
+                }
             case OP_NOT:
                 @{NOT}
                 break;
