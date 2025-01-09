@@ -216,18 +216,33 @@ int main(int argc, const char* argv[])
             case OP_BR:
                 {
                     uint16_t pc_offset = sign_extend(instr & 0x1FF, 9);
-                    uint16_t cond_flag = (instr >> 9) & 0x7;
-                    if (cond_flag & reg[R_COND])
+                    uint16_t cond_flag = (instr >> 9) & 0x7; // n,z,p
+                    if (cond_flag & reg[R_COND]) {
                         reg[R_PC] += pc_offset;
                     }
                     break;
                 }
             case OP_JMP:
-                @{JMP}
-                break;
+                {
+                    // also handles RET
+                    uint16_t base_reg = (instr >> 6) & 0x7; // n,z,p
+                    reg[R_PC] = base_reg;
+                    break;
+                }
             case OP_JSR:
-                @{JSR}
-                break;
+                {
+                    uint16_t long_flag = (instr >> 11) & 1;
+                    reg[R_R7] = reg[R_PC];
+                    if (long_flag) {
+                        uint16_t pc_offset_11 = sign_extend(instr & 0x7FF, 11);
+                        reg[R_PC] += pc_offset_11;  // JSR
+                    }
+                    else {
+                        uint16_t base_reg = (instr >> 6) & 0x7;
+                        reg[R_PC] = reg[base_reg]; // JSRR
+                    }
+                    break;
+                }
             case OP_LD:
                 @{LD}
                 break;
