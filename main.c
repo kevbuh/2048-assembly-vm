@@ -244,14 +244,18 @@ int main(int argc, const char* argv[])
                     break;
                 }
             case OP_LD:
-                @{LD}
-                break;
+                {
+                    uint16_t dr = (instr >> 9) & 0x7; // destination register (DR)
+                    uint16_t pc_offset_9 = sign_extend(instr & 0x1FF, 9);
+
+                    reg[dr] = mem_read(reg[R_PC] + pc_offset_9);
+                    update_flags(dr);
+                    break;
+                }
             case OP_LDI: 
                 {
-                    // destination register (DR)
-                    uint16_t r0 = (instr >> 9) & 0x7;
-                    // PCoffset 9 
-                    uint16_t pc_offset = sign_extend(instr & 0x1FF, 9);
+                    uint16_t r0 = (instr >> 9) & 0x7; // destination register
+                    uint16_t pc_offset = sign_extend(instr & 0x1FF, 9); // PC_offset_9 
                     // add pc_offset to the current PC, look at that memory location to get the final address
                     reg[r0] = mem_read(mem_read(reg[R_PC] + pc_offset));
 
@@ -259,11 +263,24 @@ int main(int argc, const char* argv[])
                     break;
                 }
             case OP_LDR:
-                @{LDR}
-                break;
+                {   
+                    uint16_t dr = (instr >> 9) & 0x7; // destination register
+                    uint16_t br = (instr >> 6) & 0x7; // base register
+                    uint16_t pc_offset_6 = sign_extend(instr & 0x3F, 6);
+
+                    reg[dr] = mem_read(reg[br] + pc_offset_6);
+                    update_flags(dr);
+                    break;
+                }
             case OP_LEA:
-                @{LEA}
-                break;
+                {
+                    uint16_t dr = (instr >> 9) & 0x7; // destination register
+                    uint16_t pc_offset_9 = sign_extend(instr & 0x1FF, 9);
+                    
+                    reg[dr] = reg[R_PC] + pc_offset_9;
+                    update_flags(dr);
+                    break;
+                }
             case OP_ST:
                 @{ST}
                 break;
