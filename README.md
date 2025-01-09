@@ -1,8 +1,10 @@
 # assembly-vm
 
-emulates https://en.wikipedia.org/wiki/Little_Computer_3
+[LC3](https://en.wikipedia.org/wiki/Little_Computer_3) emulator
 
-https://www.jmeiners.com/lc3-vm/#:memory-mapped-registers
+Tutorial: https://www.jmeiners.com/lc3-vm/#:memory-mapped-registers
+
+LC3 ISA Docs: https://www.jmeiners.com/lc3-vm/supplies/lc3-isa.pdf
 
 ### LC-3 Assembly Hello World
 

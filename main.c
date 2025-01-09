@@ -103,6 +103,32 @@ void handle_interrupt(int signal)
     exit(-2);
 }
 
+// Sign extension corrects this problem by filling in 0’s for positive numbers and 1’s for negative numbers
+// original values are preserved
+uint16_t sign_extend(uint16_t x, int bit_count)
+{
+    if ((x >> (bit_count - 1)) & 1) { // if negative number
+        x |= (0xFFFF << bit_count); // fill with 1's
+    }
+    return x;
+}
+
+void update_flags(uint16_t r)
+{
+    if (reg[r] == 0)
+    {
+        reg[R_COND] = FL_ZRO;
+    }
+    else if (reg[r] >> 15) // 1 in the left-most bit indicates negative
+    {
+        reg[R_COND] = FL_NEG;
+    }
+    else
+    {
+        reg[R_COND] = FL_POS;
+    }
+}
+
 int main(int argc, const char* argv[])
 {
     // LOAD ARGS
@@ -131,16 +157,37 @@ int main(int argc, const char* argv[])
     enum { PC_START = 0x3000 };
     reg[R_PC] = PC_START;
 
+    // LOOP
     int running = 1;
     while (running) {
-        /* FETCH */
+        
+        // FETCH INSTR AND GET OP
         uint16_t instr = mem_read(reg[R_PC]++);
         uint16_t op = instr >> 12;
+
         switch (op)
         {
             case OP_ADD:
-                @{ADD}
-                break;
+                {
+                    // destination register (DR)
+                    uint16_t r0 = (instr >> 9) & 0x7;
+                    // first operand (SR1)
+                    uint16_t r1 = (instr >> 6) & 0x7;
+
+                    // immediate mode flag
+                    uint16_t imm_flag = (instr >> 5) & 0x1;
+                    if (imm_flag) {
+                        uint16_t imm5 = sign_extend(instr & 0x1F, 5);
+                        reg[r0] = reg[r1] + imm5;
+                    }
+                    else {
+                        uint16_t r2 = instr & 0x7;
+                        reg[r0] = reg[r1] + reg[r2];
+                    }
+
+                    update_flags(r0);
+                    break;
+                }
             case OP_AND:
                 @{AND}
                 break;
