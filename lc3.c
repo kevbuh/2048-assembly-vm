@@ -191,12 +191,12 @@ uint16_t mem_read(uint16_t address)
     {
         if (check_key())
         {
-            memory[MR_KBSR] = (1 << 15); // Set the "keyboard ready" bit
-            memory[MR_KBDR] = getchar(); // Read the character
+            memory[MR_KBSR] = (1 << 15); // set the "keyboard ready" bit
+            memory[MR_KBDR] = getchar(); // read the character
         }
         else
         {
-            memory[MR_KBSR] = 0; // Clear the "keyboard ready" bit
+            memory[MR_KBSR] = 0; // clear the "keyboard ready" bit
         }
     }
     return memory[address];
@@ -207,7 +207,7 @@ int main(int argc, const char* argv[])
     // LOAD ARGS
     if (argc < 2) {
         // show usage string
-        printf("lc3 [image-file1] ...\n");
+        printf("Not enough arguments! ex: ./lc3-vm 2048.obj\n");
         exit(2);
     }
 
@@ -299,7 +299,7 @@ int main(int argc, const char* argv[])
                 {
                     // also handles RET
                     uint16_t base_reg = (instr >> 6) & 0x7; // n,z,p
-                    reg[R_PC] = base_reg;
+                    reg[R_PC] = reg[base_reg];
                     break;
                 }
             case OP_JSR:
@@ -397,7 +397,8 @@ int main(int argc, const char* argv[])
                         case TRAP_PUTS: // output a null terminated string
                             {
                                 uint16_t* c = memory + reg[R_R0];
-                                while (*c) {
+                                while (*c)
+                                {
                                     putc((char)*c, stdout);
                                     ++c;
                                 }
@@ -408,11 +409,13 @@ int main(int argc, const char* argv[])
                             {
                                 printf("*** Enter a character: ");
                                 char c = getchar();
+                                printf("\nRead character: %c\n", c); // Debug print
                                 putc(c, stdout);
                                 fflush(stdout);
                                 reg[R_R0] = (uint16_t)c;
                                 update_flags(R_R0);
                                 break;
+
                             }
                         case TRAP_PUTSP: // output string
                             {
@@ -432,7 +435,7 @@ int main(int argc, const char* argv[])
                             }
                         case TRAP_HALT: // halt program
                             {
-                                puts("HALT");
+                                puts("Thanks for playing!");
                                 fflush(stdout);
                                 running = 0;
                                 break;

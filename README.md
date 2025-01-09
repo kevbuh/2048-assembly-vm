@@ -1,12 +1,20 @@
-# assembly-vm
+# 2048-assembly-vm
 
-[LC3](https://en.wikipedia.org/wiki/Little_Computer_3) emulator
+[LC3](https://en.wikipedia.org/wiki/Little_Computer_3) emulator that plays the 2048 game
+
+### HOW TO PLAY
+
+Download and type the following into the console:
+
+```bash
+gcc lc3.c -o lc3-vm && ./lc3-vm 2048.obj
+```
+
+### LC-3 Assembly
 
 Tutorial: https://www.jmeiners.com/lc3-vm/#:memory-mapped-registers
 
 LC3 ISA Docs: https://www.jmeiners.com/lc3-vm/supplies/lc3-isa.pdf
-
-### LC-3 Assembly Hello World
 
 ```
 .ORIG x3000                        ; memory address where program will be loaded
