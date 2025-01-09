@@ -282,14 +282,27 @@ int main(int argc, const char* argv[])
                     break;
                 }
             case OP_ST:
-                @{ST}
-                break;
+                {
+                    uint16_t br = (instr >> 9) & 0x7;
+                    uint16_t pc_offset_9 = sign_extend(instr & 0x1FF, 9);
+                    mem_write(reg[R_PC] + pc_offset_9, reg[br]);
+                    break;
+                }
             case OP_STI:
-                @{STI}
-                break;
+                {
+                    uint16_t br = (instr >> 9) & 0x7;
+                    uint16_t pc_offset_9 = sign_extend(instr & 0x1FF, 9);
+                    mem_write(mem_read(reg[R_PC] + pc_offset_9), reg[br]);
+                    break;
+                }
             case OP_STR:
-                @{STR}
-                break;
+                {
+                    uint16_t br = (instr >> 9) & 0x7;
+                    uint16_t sr = (instr >> 6) & 0x7; // source register
+                    uint16_t offset6 = sign_extend(instr & 0x3F, 6);
+                    mem_write(reg[sr] + offset6, reg[br]);
+                    break;
+                }
             case OP_TRAP:
                 @{TRAP}
                 break;
