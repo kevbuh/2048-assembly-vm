@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "signal.h": "c",
-        "fcntl.h": "c",
-        "mman.h": "c"
-    }
-}
