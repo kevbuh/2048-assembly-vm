@@ -52,7 +52,7 @@ enum
     OP_STR,    // store register
     OP_RTI,    // unused
     OP_NOT,    // bitwise not
-    OP_LDI,    // load indirect
+    OP_LDI,    // load indirect (load a value from a location in memory into a register)
     OP_STI,    // store indirect
     OP_JMP,    // jump
     OP_RES,    // reserved (unused)
@@ -206,9 +206,18 @@ int main(int argc, const char* argv[])
             case OP_LD:
                 @{LD}
                 break;
-            case OP_LDI:
-                @{LDI}
-                break;
+            case OP_LDI: 
+                {
+                    // destination register (DR)
+                    uint16_t r0 = (instr >> 9) & 0x7;
+                    // PCoffset 9 
+                    uint16_t pc_offset = sign_extend(instr & 0x1FF, 9);
+                    // add pc_offset to the current PC, look at that memory location to get the final address
+                    reg[r0] = mem_read(mem_read(reg[R_PC] + pc_offset));
+
+                    update_flags(r0);
+                    break;
+                }
             case OP_LDR:
                 @{LDR}
                 break;
@@ -230,8 +239,10 @@ int main(int argc, const char* argv[])
             case OP_RES:
             case OP_RTI:
             default:
-                @{BAD OPCODE}
-                break;
+                { 
+                    abort();
+                    break;
+                }
         }
     }
 
