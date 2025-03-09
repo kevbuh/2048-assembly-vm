@@ -15,7 +15,7 @@ gcc lc3.c && ./a.out 2048.obj
 ### Project Information
 #### LC-3 Assembly
 
-Tutorial: https://www.jmeiners.com/lc3-vm/#:memory-mapped-registers
+Tutorial: https://www.jmeiners.com/lc3-vm/
 
 LC3 ISA Docs: https://www.jmeiners.com/lc3-vm/supplies/lc3-isa.pdf
 
